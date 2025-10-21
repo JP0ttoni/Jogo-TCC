@@ -16,7 +16,7 @@ using Unity.Networking.Transport.Relay;
 
 public class test_lobby : MonoBehaviour
 {
-
+    [SerializeField] private GameObject loading_canvas;
     private Lobby HostLobby;
     private float HeartBeatTimer;
 
@@ -58,6 +58,7 @@ public class test_lobby : MonoBehaviour
 
     public async void CreateLobby()
     {
+        loading_canvas.SetActive(true);
         try
         {
             string lobby_name = "lobby1";
@@ -79,6 +80,7 @@ public class test_lobby : MonoBehaviour
             HostLobby = lobby;
             PrintPlayers(HostLobby);
             Debug.Log("lobby criado: " + lobby_name + " " + lobby.MaxPlayers);
+            loading_canvas.SetActive(false);
         }
         catch (LobbyServiceException e)
         {
@@ -144,7 +146,8 @@ public class test_lobby : MonoBehaviour
     }
 
     public async void JoinLobby()
-{
+    {
+    loading_canvas.SetActive(true);
     try
     {
         // 1. Buscar lobbies disponíveis
@@ -173,7 +176,6 @@ public class test_lobby : MonoBehaviour
 
         // 6. Agora sim, iniciar o cliente
         NetworkManager.Singleton.StartClient();
-
         // 7. Guardar referência do lobby localmente
         HostLobby = lobby;
         PrintPlayers(lobby);
@@ -182,6 +184,7 @@ public class test_lobby : MonoBehaviour
     {
         Debug.LogError(e);
     }
+    loading_canvas.SetActive(false);
 }
 
 

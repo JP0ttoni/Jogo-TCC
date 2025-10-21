@@ -14,6 +14,7 @@ using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using JetBrains.Annotations;
+using System.Data;
 
 public class relay_manager : MonoBehaviour
 {
@@ -103,35 +104,39 @@ public class relay_manager : MonoBehaviour
         }
     }
 
-    public async Task<string> CreateRelay()
+public async Task<string> CreateRelay()
+{
+    await EnsureSignedInAsync();
+    string joinCode = "";
+
+    try
     {
-        await EnsureSignedInAsync();
-        string joinCode = "";
+        Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
+        joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
-        try
-        {
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
-            joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+        var relayServerData = new RelayServerData(allocation, "dtls");
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
-            var relayServerData = new RelayServerData(allocation, "dtls"); // ou "udp" se tiver problema no device
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Example Scene");
-            asyncLoad.completed += (op) =>
-                NetworkManager.Singleton.StartServer();//StartHost()
-                text1.enabled = true;
-                codeText.enabled = true;
-                codeText.text = "code:" + joinCode;
-            {
-            };
+        // Primeiro inicia o servidor
+        NetworkManager.Singleton.StartServer(); // ou StartHost() se quiser controlar como jogador também
 
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("CreateRelay error: " + e);
-        }
-        return joinCode;
+            // Depois carrega a cena em rede (sincronizada)
+        NetworkManager.Singleton.SceneManager.LoadScene("lobby_start", LoadSceneMode.Single);
+        
 
+        text1.enabled = true;
+        codeText.enabled = true;
+        codeText.text = "code: " + joinCode;
+
+        Debug.Log($"Relay criado! JoinCode: {joinCode}");
     }
+    catch (Exception e)
+    {
+        Debug.LogError("CreateRelay error: " + e);
+    }
+
+    return joinCode;
+}
 
     public async void joinRelay(string joinCode)
     {
