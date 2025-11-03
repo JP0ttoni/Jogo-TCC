@@ -4,7 +4,7 @@ using Cinemachine;
 
 public class CameraFollowSetup : NetworkBehaviour
 {
-    private void Start()
+    private void Update()
     {
         if (IsOwner) // só a câmera do player local
         {

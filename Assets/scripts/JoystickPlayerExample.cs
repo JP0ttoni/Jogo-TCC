@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class JoystickPlayerExample : NetworkBehaviour
 {
-    
     public float speed = 5f;
     public VariableJoystick variableJoystick;
     public CharacterController controller;
@@ -15,45 +14,46 @@ public class JoystickPlayerExample : NetworkBehaviour
     private void Start()
     {
         // Garante que só o Player local pega input
-        if (IsOwner) // se for Mirror: if (isLocalPlayer)
+        if (IsOwner)
         {
             DontDestroyOnLoad(gameObject);
-            // Procura o joystick da cena
             variableJoystick = FindObjectOfType<VariableJoystick>();
         }
     }
+
     private void Update()
     {
         if (!IsOwner) return;
-        // Pega a direção do joystick
+
         variableJoystick = FindObjectOfType<VariableJoystick>();
         Vector3 direction = new Vector3(variableJoystick.Horizontal, 0f, variableJoystick.Vertical);
 
-        // Se houver entrada no joystick
         if (direction.magnitude >= 0.1f)
         {
-            // Normaliza para não aumentar a velocidade na diagonal
             Vector3 move = direction.normalized * speed * Time.deltaTime;
-
-            // Move usando CharacterController
             controller.Move(move);
 
-            // Faz o personagem rotacionar suavemente para a direção do movimento
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
     }
 
-
-public void GoToPrivateScene(string privateSceneName)
+    public void GoToPrivateScene(string privateSceneName)
     {
         if (!IsOwner) return;
 
-        // 1. Oculta o player para os outros
         HidePlayerForOthersServerRpc();
+        //transform.position = new Vector3(0, 0.55f, 0);
+        StartCoroutine(LoadSceneAdditive(privateSceneName, true));
+    }
 
-        // 2. Carrega a cena privada localmente
-        StartCoroutine(LoadPrivateScene(privateSceneName));
+    public void ReturnToLobby()
+    {
+        if (!IsOwner) return;
+
+        //transform.position = new Vector3(0, 0.55f, 0);
+        ShowPlayerForOthersServerRpc();
+        StartCoroutine(LoadSceneAdditive("lobby_start", false));
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -67,49 +67,63 @@ public void GoToPrivateScene(string privateSceneName)
     {
         if (!IsOwner)
         {
-            // Desativa os renderers do player
             foreach (var r in GetComponentsInChildren<Renderer>())
                 r.enabled = false;
 
-            // Opcional: desativa colliders
             foreach (var c in GetComponentsInChildren<Collider>())
                 c.enabled = false;
         }
     }
 
-    private IEnumerator LoadPrivateScene(string privateSceneName)
-{
-        // 1. Obtenha uma referência à cena que está chamando (a "cena antiga")
-        Scene oldScene = gameObject.scene;
-        Debug.Log(oldScene);
-
-    // 2. Carrega a nova cena aditivamente
-    AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(privateSceneName, LoadSceneMode.Additive);
-    while (!asyncLoad.isDone)
-        yield return null;
-
-    // 3. O resto do seu código para configurar a nova cena
-    Scene privateScene = SceneManager.GetSceneByName(privateSceneName);
-    SceneManager.MoveGameObjectToScene(gameObject, privateScene);
-    SceneManager.SetActiveScene(privateScene);
-    AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(1);
-
-    transform.position = new Vector3(0, 1, 0);
-
-    // 4. Descarrega a cena antiga
-    // Use UnloadSceneAsync e espere que termine.
-        while (!asyncUnload.isDone)
-        {
-            Debug.Log("ainda não terminou");
-            yield return null;
-        }
-}
-
-    void OnTriggerEnter(Collider other)
+    [ServerRpc(RequireOwnership = false)]
+    private void ShowPlayerForOthersServerRpc(ServerRpcParams rpcParams = default)
     {
-        if(other.tag == "mg1")
+        ShowPlayerForOthersClientRpc();
+    }
+
+    [ClientRpc]
+    private void ShowPlayerForOthersClientRpc(ClientRpcParams rpcParams = default)
+    {
+        
+            foreach (var r in GetComponentsInChildren<Renderer>())
+                r.enabled = true;
+
+            foreach (var c in GetComponentsInChildren<Collider>())
+                c.enabled = true;
+        
+    }
+
+    private IEnumerator LoadSceneAdditive(string sceneName, bool hideOthers)
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        //NetworkManager.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        while (!asyncLoad.isDone)
+            yield return null;
+
+        Scene newScene = SceneManager.GetSceneByName(sceneName);
+        SceneManager.MoveGameObjectToScene(gameObject, newScene);
+        SceneManager.SetActiveScene(newScene);
+
+        AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(currentSceneIndex);
+
+        // Define posição padrão (pode ajustar)
+        transform.position = new Vector3(0, 0.55f, 0);
+
+        while (!asyncUnload.isDone)
+            yield return null;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("mg1"))
         {
             GoToPrivateScene("mg1");
+        }
+        else if (other.CompareTag("back"))
+        {
+            ReturnToLobby();
         }
     }
 }
