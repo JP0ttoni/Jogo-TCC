@@ -1,30 +1,44 @@
 using DilmerGames.Core.Singletons;
 using Unity.Netcode;
+using UnityEngine;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
-    NetworkVariable<int> playersInGame = new NetworkVariable<int>();
+    private NetworkVariable<int> playersInGame = new NetworkVariable<int>();
 
-    public int PlayersInGame
+    public int PlayersInGame => playersInGame.Value;
+
+    private void Start()
     {
-        get
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+    }
+
+    // ✅ Corrigido: precisa ser public override (não protected)
+    public override void OnDestroy()
+    {
+        base.OnDestroy(); // mantém a limpeza do NetworkBehaviour
+
+        if (NetworkManager.Singleton != null)
         {
-            return playersInGame.Value;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
         }
     }
 
-    void Start()
+    private void OnClientConnected(ulong id)
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
-        {
-            if(IsServer)
-                playersInGame.Value++;
-        };
+        if (!IsServer) return;
+        if (!IsSpawned || playersInGame == null) return;
 
-        NetworkManager.Singleton.OnClientDisconnectCallback += (id) =>
-        {
-            if(IsServer)
-                playersInGame.Value--;
-        };
+        playersInGame.Value++;
+    }
+
+    private void OnClientDisconnected(ulong id)
+    {
+        if (!IsServer) return;
+        if (!IsSpawned || playersInGame == null) return;
+
+        playersInGame.Value = Mathf.Max(0, playersInGame.Value - 1);
     }
 }

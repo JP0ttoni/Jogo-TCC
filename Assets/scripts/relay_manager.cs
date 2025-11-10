@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine.SceneManagement;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -13,63 +10,51 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
-using JetBrains.Annotations;
-using System.Data;
+using UnityEngine.SceneManagement;
 
 public class relay_manager : MonoBehaviour
 {
     public static relay_manager Instance;
+
     [SerializeField] Button hostButton;
     [SerializeField] Button joinButton;
     [SerializeField] TMP_InputField joinInput;
     [SerializeField] TextMeshProUGUI codeText;
-
     [SerializeField] TextMeshProUGUI text1;
     public GameObject canvas;
 
-    // evita múltiplas tentativas simultâneas de sign-in
     private static bool s_signInInProgress = false;
 
     private void Awake()
-{
-    if (Instance == null)
     {
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
-    else
+
+    private async void Start()
     {
-        Destroy(gameObject);
-    }
-}
-    async void Start()
-    {
-        DontDestroyOnLoad(canvas);
         text1.enabled = false;
         codeText.enabled = false;
+
         await UnityServices.InitializeAsync();
-
-        AuthenticationService.Instance.SignedIn += () =>
-        {
-            Debug.Log("Signed in: " + AuthenticationService.Instance.PlayerId);
-        };
-
-        // garante que estamos autenticados antes de habilitar os botões
         await EnsureSignedInAsync();
 
         hostButton.onClick.AddListener(() => { _ = CreateRelay(); });
-
-        // Botão join → precisa passar parâmetro, então usa lambda
         joinButton.onClick.AddListener(() => joinRelay(joinInput.text));
     }
 
     public async Task EnsureSignedInAsync()
     {
-        // já estamos autenticados
         if (AuthenticationService.Instance.IsSignedIn)
             return;
 
-        // outra rotina já está assinando — espera até que termine (timeout seguro)
         if (s_signInInProgress)
         {
             int waited = 0;
@@ -87,16 +72,11 @@ public class relay_manager : MonoBehaviour
         try
         {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log("SignInAnonymouslyAsync succeeded: " + AuthenticationService.Instance.PlayerId);
-        }
-        catch (AuthenticationException ex) when (ex.ErrorCode == AuthenticationErrorCodes.ClientInvalidUserState)
-        {
-            // Já está em sign-in ou já assinado — podemos ignorar
-            Debug.Log("Sign-in in progress or already signed in (ignored).");
+            Debug.Log("Assinado anonimamente: " + AuthenticationService.Instance.PlayerId);
         }
         catch (Exception ex)
         {
-            Debug.LogError("Sign-in failed: " + ex);
+            Debug.LogWarning("Falha no sign-in: " + ex);
         }
         finally
         {
@@ -104,39 +84,35 @@ public class relay_manager : MonoBehaviour
         }
     }
 
-public async Task<string> CreateRelay()
-{
-    await EnsureSignedInAsync();
-    string joinCode = "";
-
-    try
+    public async Task<string> CreateRelay()
     {
-        Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
-        joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+        await EnsureSignedInAsync();
+        string joinCode = "";
 
-        var relayServerData = new RelayServerData(allocation, "dtls");
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+        try
+        {
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
+            joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
-        // Primeiro inicia o servidor
-        NetworkManager.Singleton.StartServer(); // ou StartHost() se quiser controlar como jogador também
+            var relayServerData = new RelayServerData(allocation, "dtls");
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
-            // Depois carrega a cena em rede (sincronizada)
-        NetworkManager.Singleton.SceneManager.LoadScene("lobby_start", LoadSceneMode.Single);
-        
+            NetworkManager.Singleton.StartServer();
+            NetworkManager.Singleton.SceneManager.LoadScene("lobby_start", LoadSceneMode.Single);
 
-        text1.enabled = true;
-        codeText.enabled = true;
-        codeText.text = "code: " + joinCode;
+            codeText.enabled = true;
+            text1.enabled = true;
+            codeText.text = $"Code: {joinCode}";
 
-        Debug.Log($"Relay criado! JoinCode: {joinCode}");
+            Debug.Log($"Relay criado! JoinCode: {joinCode}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Erro ao criar Relay: " + e);
+        }
+
+        return joinCode;
     }
-    catch (Exception e)
-    {
-        Debug.LogError("CreateRelay error: " + e);
-    }
-
-    return joinCode;
-}
 
     public async void joinRelay(string joinCode)
     {
@@ -145,22 +121,22 @@ public async Task<string> CreateRelay()
         try
         {
             var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-            var relayServerData = new RelayServerData(joinAllocation, "dtls"); // ou "udp"
+            var relayServerData = new RelayServerData(joinAllocation, "dtls");
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
             NetworkManager.Singleton.StartClient();
         }
         catch (Exception e)
         {
-            Debug.LogError("joinRelay error: " + e);
+            Debug.LogError("Erro ao entrar no Relay: " + e);
         }
     }
 
-    void Update()
+    private void Update()
     {
-        if (NetworkManager.Singleton.IsHost)
-        {    
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost)
+        {
             int playerCount = NetworkManager.Singleton.ConnectedClientsList.Count;
-            text1.text = $"jogadores: {playerCount}";
+            text1.text = $"Jogadores conectados: {playerCount}";
         }
     }
 }
