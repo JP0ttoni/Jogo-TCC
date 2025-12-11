@@ -23,7 +23,7 @@ public class JoystickPlayerExample : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner) return;
+        //if (!IsOwner) return;
 
         variableJoystick = FindObjectOfType<VariableJoystick>();
         Vector3 direction = new Vector3(variableJoystick.Horizontal, 0f, variableJoystick.Vertical);
