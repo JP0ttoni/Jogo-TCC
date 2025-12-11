@@ -16,6 +16,8 @@ public class david_pergunta : MonoBehaviour
     public int points = 0;
     public GameObject david;
     public GameObject canvas;
+    public GameObject left;
+    public GameObject right;
     public TextMeshProUGUI points_txt; 
     // Start is called before the first frame update
     void Start()
@@ -31,12 +33,11 @@ public class david_pergunta : MonoBehaviour
         {
             questions_object[question].SetActive(true);
             cam.enabled = true;
-            canvas.SetActive(false);
+            
         }
         else
         {
             cam.enabled = false;
-            canvas.SetActive(true);
         }
 
         if(question > 8)
@@ -60,6 +61,7 @@ public class david_pergunta : MonoBehaviour
         if(other.CompareTag("Player"))
         {
             is_talking = true;
+            canvas.SetActive(false);
         }
     }
 
@@ -82,20 +84,25 @@ public class david_pergunta : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, transform.position.y, 30.51f);
             david.transform.position = new Vector3(david.transform.position.x, david.transform.position.y, 30.51f);
+            right.transform.position = new Vector3(right.transform.position.x, right.transform.position.y, 43.57f);
+            left.transform.position = new Vector3(left.transform.position.x, left.transform.position.y, 43.57f);
         } 
 
         if(question == 5)
         {
             transform.position = new Vector3(transform.position.x, transform.position.y, 52.26f);
             david.transform.position = new Vector3(david.transform.position.x, david.transform.position.y, 52.26f);
+            right.transform.position = new Vector3(right.transform.position.x, right.transform.position.y, 65.51f);
+            left.transform.position = new Vector3(left.transform.position.x, left.transform.position.y, 65.51f);
         }
         question++;
         is_talking = false;
+        canvas.SetActive(true);
     }
     
 
 }
 
-//q2 30.51
+//q2 30.51 - 43.57
 
-//q3 52.26
+//q3 52.26 - 65.51
