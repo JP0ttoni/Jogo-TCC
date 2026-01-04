@@ -8,6 +8,7 @@ TagManager:
   - back
   - talk
   - destroy
+  - operation
   layers:
   - Default
   - TransparentFX
