@@ -13,56 +13,77 @@ public class spawn_operation : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(cd_1());
-        StartCoroutine(cd_2());
-        StartCoroutine(cd_3());
+        spawn_obj1();
+        spawn_obj2();
+        spawn_obj3(); 
     }
 
 
     IEnumerator cd_1()
     {
-        yield return new WaitForSeconds(Random.Range(3f, 4f));
-        spawn_obj();
+        yield return new WaitForSeconds(Random.Range(4f, 5f));
+        spawn_obj1();
     }
 
+
+    void spawn_obj1()
+    {
+        if(!GameObject.Find("timer").GetComponent<timer>().stop)
+        {    
+            int choose = Random.Range(0, operation.Length);
+
+            GameObject clone = Instantiate(operation[choose], spawn[0]);   
+
+            RectTransform rt = clone.GetComponent<RectTransform>();
+
+            rt.anchoredPosition = Vector2.zero; // centro do canvas
+            rt.localScale = Vector3.one;
+
+            StartCoroutine(cd_1());
+        }
+    }
     IEnumerator cd_2()
     {
         yield return new WaitForSeconds(Random.Range(5f, 6f));
-        spawn_obj();
+        spawn_obj2();
+    }
+
+    void spawn_obj2()
+    {
+        if(!GameObject.Find("timer").GetComponent<timer>().stop)
+        {    
+            int choose = Random.Range(0, operation.Length);
+
+            GameObject clone = Instantiate(operation[choose], spawn[1]);   
+
+            RectTransform rt = clone.GetComponent<RectTransform>();
+
+            rt.anchoredPosition = Vector2.zero; // centro do canvas
+            rt.localScale = Vector3.one;
+            StartCoroutine(cd_2());
+        }
     }
 
     IEnumerator cd_3()
     {
         yield return new WaitForSeconds(Random.Range(6f, 7f));
-        spawn_obj();
+        spawn_obj3();
     }
 
-    void spawn_obj()
+    void spawn_obj3()
     {
-        int choose = Random.Range(0, operation.Length);
+        if(!GameObject.Find("timer").GetComponent<timer>().stop)
+        {    
+            int choose = Random.Range(0, operation.Length);
 
-        GameObject clone = Instantiate(operation[choose], spawn[i]);
-        if (i == 0)
-        {
-            StartCoroutine(cd_1());
-            
-        } else if(i == 1)
-        {
-            StartCoroutine(cd_2());
-        }else if(i == 2)
-        {
+            GameObject clone = Instantiate(operation[choose], spawn[2]);   
+
+            RectTransform rt = clone.GetComponent<RectTransform>();
+
+            rt.anchoredPosition = Vector2.zero; // centro do canvas
+            rt.localScale = Vector3.one;
             StartCoroutine(cd_3());
         }
-        i++;
-        if(i > 2)
-        {
-            i = 0;    
-        }
-
-        RectTransform rt = clone.GetComponent<RectTransform>();
-
-        rt.anchoredPosition = Vector2.zero; // centro do canvas
-        rt.localScale = Vector3.one;
     }
 }
 
