@@ -6,6 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class JoystickPlayerExample : NetworkBehaviour
 {
+    [Header("Jump")]
+    public float jumpForce = 5f;
+    public float gravity = -9.81f;
+    private float verticalVelocity;
+    public Transform groundCheck;
+    public float groundDistance = 0.3f;
+    public LayerMask groundMask;
+
+    public bool isGrounded;
     public float speed = 5f;
     public VariableJoystick variableJoystick;
     public CharacterController controller;
@@ -26,17 +35,40 @@ public class JoystickPlayerExample : NetworkBehaviour
         //if (!IsOwner) return;
 
         variableJoystick = FindObjectOfType<VariableJoystick>();
-        Vector3 direction = new Vector3(variableJoystick.Horizontal, 0f, variableJoystick.Vertical);
+        isGrounded = Physics.CheckSphere(
+        groundCheck.position,
+        groundDistance,
+        groundMask
+    );
+
+    if (isGrounded && verticalVelocity < 0)
+    {
+        verticalVelocity = -2f; // mantém colado no chão
+    }
+
+    Vector3 direction = new Vector3( variableJoystick.Horizontal, 0f, variableJoystick.Vertical);
 
         if (direction.magnitude >= 0.1f)
         {
             Vector3 move = direction.normalized * speed * Time.deltaTime;
-            controller.Move(move);
 
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            controller.Move(move);
         }
+        verticalVelocity += gravity * Time.deltaTime;
+        controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
     }
+
+    public void Jump()
+{
+    //if (!IsOwner) return;
+
+    if (isGrounded)
+    {
+        verticalVelocity = Mathf.Sqrt(jumpForce * -2f * gravity);
+    }
+}
 
     public void GoToPrivateScene(string privateSceneName)
     {
