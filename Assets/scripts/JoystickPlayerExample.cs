@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
 public class JoystickPlayerExample : NetworkBehaviour
 {
     [Header("Jump")]
@@ -19,6 +20,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     public VariableJoystick variableJoystick;
     public CharacterController controller;
     public float rotationSpeed = 10f;
+    public Vector3 last_pos;
 
     private void Start()
     {
@@ -33,6 +35,11 @@ public class JoystickPlayerExample : NetworkBehaviour
     private void Update()
     {
         //if (!IsOwner) return;
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            Jump();
+        }
 
         variableJoystick = FindObjectOfType<VariableJoystick>();
         isGrounded = Physics.CheckSphere(
@@ -50,11 +57,45 @@ public class JoystickPlayerExample : NetworkBehaviour
 
         if (direction.magnitude >= 0.1f)
         {
-            Vector3 move = direction.normalized * speed * Time.deltaTime;
+            if(SceneManager.GetActiveScene().name == "mg_geo")
+            {
+                speed = 23f;
+                Vector3 camForward = Camera.main.transform.forward;
+                Vector3 camRight = Camera.main.transform.right;
 
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            controller.Move(move);
+                camForward.y = 0;
+                camRight.y = 0;
+
+                camForward.Normalize();
+                camRight.Normalize();
+
+                Vector3 moveDirection = camForward * direction.z + camRight * direction.x;
+                controller.Move(moveDirection * speed * Time.deltaTime);
+
+
+                // Rotação para onde anda
+                if (moveDirection != Vector3.zero)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                    transform.rotation = Quaternion.Slerp(
+                        transform.rotation,
+                        targetRotation,
+                        (rotationSpeed/5) * Time.deltaTime
+                    );
+                }
+            }
+            else
+            {
+                speed = 5f;
+                Vector3 move = direction.normalized * speed * Time.deltaTime;
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                controller.Move(move);
+            }
+
+            verticalVelocity += gravity * Time.deltaTime;
+            controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
+
         }
         verticalVelocity += gravity * Time.deltaTime;
         controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
@@ -149,6 +190,7 @@ public class JoystickPlayerExample : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.name);
         if (other.CompareTag("mg1"))
         {
             GoToPrivateScene("mg1");
@@ -157,5 +199,115 @@ public class JoystickPlayerExample : NetworkBehaviour
         {
             ReturnToLobby();
         }
+
+        if(other.name == "water")
+        {
+            Debug.Log("caiu na agua");
+            controller.enabled = false;
+            transform.position = last_pos;
+            controller.enabled = true;
+        }
     }
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        int current_state = state_check(hit.gameObject.name[..2]);
+        Animator map = GameObject.Find("map").GetComponent<Animator>();
+        map.SetInteger("estados", current_state);
+        Debug.Log(hit.gameObject.tag);
+        
+        
+        if(isGrounded && verticalVelocity < 0)
+        {
+            last_pos = new Vector3(hit.transform.position.x, hit.transform.position.y + 5, hit.transform.position.z);
+        } 
+    }
+
+    private int state_check(string name)
+    {
+        switch(name)
+        {
+            case "RS":
+                return 1;
+
+            case "SC":
+                return 2;
+
+            case "PR":
+                return 3;
+
+            case "SP":
+                return 4;
+
+            case "RJ":
+                return 5;
+
+            case "ES":
+                return 6;
+
+            case "MG":
+                return 7;
+
+            case "BA":
+                return 8;
+
+            case "SE":
+                return 9;
+
+            case "AL":
+                return 10;
+
+            case "PE":
+                return 11;
+
+            case "PB":
+                return 12;
+
+            case "RN":
+                return 13;
+
+            case "CE":
+                return 14;
+
+            case "PI":
+                return 15;
+
+            case "MA":
+                return 16;
+
+            case "TO":
+                return 17;
+
+            case "PA":
+                return 18;
+
+            case "AP":
+                return 19;
+
+            case "AM":
+                return 20;
+
+            case "RR":
+                return 21;
+
+            case "AC":
+                return 22;
+
+            case "RO":
+                return 23;
+
+            case "GO":
+                return 24;
+
+            case "MT":
+                return 25;
+
+            case "MS":
+                return 26;
+                
+            default:
+                return 0;
+        }
+
+    }
+        
 }
