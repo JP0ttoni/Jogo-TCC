@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -210,10 +212,13 @@ public class JoystickPlayerExample : NetworkBehaviour
     }
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        int current_state = state_check(hit.gameObject.name[..2]);
+        string state = hit.gameObject.name[..2];
+        int current_state = state_check(state);
         Animator map = GameObject.Find("map").GetComponent<Animator>();
         map.SetInteger("estados", current_state);
         Debug.Log(hit.gameObject.tag);
+
+        GameObject.Find("sigla").GetComponent<TextMeshProUGUI>().text = state;
         
         
         if(isGrounded && verticalVelocity < 0)
