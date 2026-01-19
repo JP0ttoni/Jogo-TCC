@@ -23,6 +23,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     public CharacterController controller;
     public float rotationSpeed = 10f;
     public Vector3 last_pos;
+    public bool death = false;
 
     private void Start()
     {
@@ -215,8 +216,11 @@ public class JoystickPlayerExample : NetworkBehaviour
         string state = hit.gameObject.name[..2];
         int current_state = state_check(state);
         Animator map = GameObject.Find("map").GetComponent<Animator>();
+        if(hit.gameObject.tag == "death")
+        {
+            death = true;
+        }
         map.SetInteger("estados", current_state);
-        Debug.Log(hit.gameObject.tag);
 
         GameObject.Find("sigla").GetComponent<TextMeshProUGUI>().text = state;
         

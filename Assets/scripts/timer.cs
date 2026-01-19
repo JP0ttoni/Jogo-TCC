@@ -8,11 +8,16 @@ using UnityEngine.SceneManagement;
 public class timer : MonoBehaviour
 {
     public TextMeshProUGUI time_text;
-    public int time = 25;
+    bool trigger = true;
+    public int time = 20;
 
     public bool stop = false;
 
     public int score = 0;
+
+    public GameObject death;
+
+
     Coroutine countdownRoutine;
     // Start is called before the first frame update
     void Start()
@@ -22,7 +27,7 @@ public class timer : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
+    { 
         switch (SceneManager.GetActiveScene().name)
         {
             
@@ -43,15 +48,23 @@ public class timer : MonoBehaviour
 
             case "mg_geo":
                 time_text.text = time.ToString();
-                if(time <= 5)
+                if(time <= 5 && time != 0)
                 {
                     time_text.color = Color.red;
                 }
-                if(time <= 0)
+                if(time <= 0 && trigger)
                 {
+                    death.SetActive(true);
+                    trigger = false;
                     time_text.color = Color.white;
-                    DestroyAllChildren(GameObject.Find("estados").GetComponent<Transform>(), "RS");
+                    string objective = GameObject.Find("quest txt").GetComponent<quest>().objective;
+                    DestroyAllChildren(GameObject.Find("estados").GetComponent<Transform>(), objective);
                     Invoke(nameof(wait_for_reset), 3f);
+                }
+                if(time > 0)
+                {
+                    death.SetActive(false);
+                    trigger = true;
                 }
                 break;
         }
@@ -109,10 +122,11 @@ public class timer : MonoBehaviour
             StopCoroutine(countdownRoutine);
 
 
-        time = 25;
+        time = 20;
 
         countdownRoutine = StartCoroutine(countdown());
         Transform estados = GameObject.Find("estados").transform;
         reset_obj(estados);
+        GameObject.Find("quest txt").GetComponent<quest>().index += 1;
     }     
 }

@@ -11,6 +11,7 @@ TagManager:
   - operation
   - Ground
   - estados
+  - death
   layers:
   - Default
   - TransparentFX
