@@ -17,6 +17,10 @@ public class timer : MonoBehaviour
 
     public GameObject death;
 
+    public GameObject death_canvas;
+
+    private bool dead,won = false;
+
 
     Coroutine countdownRoutine;
     // Start is called before the first frame update
@@ -47,6 +51,10 @@ public class timer : MonoBehaviour
                 break;
 
             case "mg_geo":
+                if(dead || won)
+                {
+                    time = 0;    
+                }
                 time_text.text = time.ToString();
                 if(time <= 5 && time != 0)
                 {
@@ -123,10 +131,25 @@ public class timer : MonoBehaviour
 
 
         time = 20;
-
+        if(!dead)
+        {
+            score ++;
+        }
         countdownRoutine = StartCoroutine(countdown());
         Transform estados = GameObject.Find("estados").transform;
         reset_obj(estados);
-        GameObject.Find("quest txt").GetComponent<quest>().index += 1;
-    }     
+        var quest = GameObject.Find("quest txt").GetComponent<quest>();
+        quest.index += 1;
+        if(quest.objective_list.Length == quest.index)
+        {
+            won = true;
+            Debug.Log("ganhou");
+        }
+    }
+
+    public void show_death()
+    {
+        death_canvas.SetActive(true);
+        dead = true;
+    }
 }

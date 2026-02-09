@@ -219,6 +219,7 @@ public class JoystickPlayerExample : NetworkBehaviour
         if(hit.gameObject.tag == "death")
         {
             death = true;
+            GameObject.Find("timer").GetComponent<timer>().show_death();
         }
         map.SetInteger("estados", current_state);
 
