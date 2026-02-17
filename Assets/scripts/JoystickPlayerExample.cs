@@ -228,7 +228,7 @@ public class JoystickPlayerExample : NetworkBehaviour
         
         if(isGrounded && verticalVelocity < 0)
         {
-            last_pos = new Vector3(hit.transform.position.x, hit.transform.position.y + 5, hit.transform.position.z);
+            last_pos = new Vector3(hit.transform.position.x, hit.transform.position.y + 20, hit.transform.position.z);
         } 
     }
 

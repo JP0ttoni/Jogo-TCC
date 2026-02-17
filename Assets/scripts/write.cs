@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +10,7 @@ public class write : MonoBehaviour
 {
     public int word = 0;
     public int letter = 0;
-    public GameObject father;
+    public GameObject father, end;
     private string answer = "vogal";
     public string current_answer = "";
     public Sprite outline, plain;
@@ -152,12 +153,25 @@ public class write : MonoBehaviour
             j = 0;
             i++;
         }
-        if(current_answer == answer)
+        if(current_answer.ToLower() == answer)
         {
             Debug.Log("acertou");
+            end.SetActive(true);
             return;
         }
         current_answer = "";
+        if(word >= 5)
+        {
+            foreach (Transform child in end.transform)
+            {
+                if(child.name == "message")
+                {
+                    child.GetComponent<TextMeshProUGUI>().text = "Que pena, você não acertou. A palavra era:";
+                }
+            }
+            end.SetActive(true);
+            return;
+        }
         word++;
         letter = 0;
     }
