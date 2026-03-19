@@ -8,6 +8,7 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using TMPro;
 using UnityEngine.SceneManagement;
 using Unity.Services.Relay;
 using Unity.Netcode.Transports.UTP;
@@ -19,6 +20,8 @@ public class test_lobby : MonoBehaviour
     private Lobby HostLobby;
     private float HeartBeatTimer;
     private float lobbyUpdateTimer;
+
+    public TMP_InputField lobbyCodeInput;
 
     private string playerName;
     public GameObject canvas;
@@ -105,48 +108,44 @@ public class test_lobby : MonoBehaviour
         }
     }
 
-    public async void JoinLobby()
+    public async void JoinLobbyByCode()
+{
+    loading_canvas.SetActive(true);
+
+    try
     {
-        loading_canvas.SetActive(true);
-        try
+        await EnsureNotInLobbyAsync();
+
+        var joinLobbyByCodeOptions = new JoinLobbyByCodeOptions
         {
-            await EnsureNotInLobbyAsync();
-            QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync();
+            Player = GetPlayer()
+        };
 
-            if (queryResponse.Results.Count == 0)
-            {
-                Debug.LogWarning("Nenhum lobby encontrado!");
-                loading_canvas.SetActive(false);
-                return;
-            }
+        Lobby lobby = await Lobbies.Instance.JoinLobbyByCodeAsync(
+            lobbyCodeInput.text,
+            joinLobbyByCodeOptions
+        );
 
-            var joinLobbyByIdOptions = new JoinLobbyByIdOptions
-            {
-                Player = GetPlayer()
-            };
+        string joincode = lobby.Data["JoinCode"].Value;
 
-            Lobby lobby = await Lobbies.Instance.JoinLobbyByIdAsync(queryResponse.Results[0].Id, joinLobbyByIdOptions);
-            string joincode = lobby.Data["JoinCode"].Value;
+        var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joincode);
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
-            var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joincode);
-            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            transport.SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+        NetworkManager.Singleton.StartClient();
+        HostLobby = lobby;
 
-            NetworkManager.Singleton.StartClient();
-            HostLobby = lobby;
-
-            PrintPlayers(lobby);
-        }
-        catch (LobbyServiceException e)
-        {
-            Debug.LogError("Erro ao entrar no lobby: " + e);
-        }
-        finally
-        {
-            loading_canvas.SetActive(false);
-        }
+        PrintPlayers(lobby);
     }
-
+    catch (LobbyServiceException e)
+    {
+        Debug.LogError("Erro ao entrar no lobby: " + e);
+    }
+    finally
+    {
+        loading_canvas.SetActive(false);
+    }
+}
     private void Update()
     {
         if (NetworkManager.Singleton.IsServer)

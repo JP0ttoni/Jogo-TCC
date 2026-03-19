@@ -1838,6 +1838,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loading_canvas: {fileID: 1764287354}
+  lobbyCodeInput: {fileID: 223585360}
   canvas: {fileID: 1111658896}
 --- !u!850595691 &653620580
 LightingSettings:
@@ -2438,6 +2439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loading_canvas: {fileID: 0}
+  lobbyCodeInput: {fileID: 0}
   canvas: {fileID: 0}
 --- !u!4 &1080191019
 Transform:

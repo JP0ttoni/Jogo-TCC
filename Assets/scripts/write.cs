@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +16,7 @@ public class write : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Screen.orientation = ScreenOrientation.Portrait;
     }
 
     // Update is called once per frame

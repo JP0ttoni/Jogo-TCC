@@ -412,7 +412,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 86118376}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09416022, y: -0.012136552, z: 0.0011479664, w: 0.99548244}
+  m_LocalRotation: {x: 0.09416504, y: -0.0067600533, z: 0.00063941674, w: 0.99553347}
   m_LocalPosition: {x: -0.74, y: 8.190001, z: -10.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1053,9 +1053,9 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ReferenceResolution: {x: 1080, y: 1920}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 1
+  m_MatchWidthOrHeight: 0.6
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -5182,7 +5182,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00019836426, y: -1.9757004}
+  m_AnchoredPosition: {x: -0.00018310547, y: -1.9757004}
   m_SizeDelta: {x: 2054.771, y: 976.0164}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1035681715
@@ -7443,7 +7443,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1508378253}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.06576959, y: -0.7124942, z: 0.067393064, w: 0.69533056}
+  m_LocalRotation: {x: 0.0661326, y: -0.70872855, z: 0.067036875, w: 0.6991684}
   m_LocalPosition: {x: 10.070001, y: 8.190001, z: -0.7399988}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

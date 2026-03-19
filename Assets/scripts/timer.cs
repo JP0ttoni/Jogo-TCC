@@ -36,6 +36,7 @@ public class timer : MonoBehaviour
         {
             
             case "mg_mat":
+                Screen.orientation = ScreenOrientation.Portrait;
                 time_text.text = time.ToString();
                 if(time <= 0)
                 {

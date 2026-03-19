@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,7 @@ public class david_pergunta : MonoBehaviour
     public GameObject left;
     public GameObject right;
     public TextMeshProUGUI points_txt; 
+    public GameObject canvas_question;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,11 +34,13 @@ public class david_pergunta : MonoBehaviour
         if (is_talking)
         {
             questions_object[question].SetActive(true);
+            canvas_question.SetActive(true);
             cam.enabled = true;
             
         }
         else
         {
+            canvas_question.SetActive(false);
             cam.enabled = false;
         }
 
@@ -58,10 +62,11 @@ public class david_pergunta : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player"))
+        if(other.CompareTag("Player") && other.gameObject.GetComponent<JoystickPlayerExample>().IsOwner)
         {
             is_talking = true;
             canvas.SetActive(false);
+
         }
     }
 

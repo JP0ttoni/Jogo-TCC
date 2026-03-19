@@ -24,9 +24,13 @@ public class JoystickPlayerExample : NetworkBehaviour
     public float rotationSpeed = 10f;
     public Vector3 last_pos;
     public bool death = false;
+    public GameObject lobbyMap;
+
+    private Vector3 minigameOffset = new Vector3(5000f, 0f, 0f);
 
     private void Start()
     {
+        lobbyMap = GameObject.Find("hide");
         // Garante que só o Player local pega input
         if (IsOwner)
         {
@@ -37,6 +41,15 @@ public class JoystickPlayerExample : NetworkBehaviour
 
     private void Update()
     {
+        if(!IsOwner) return;
+        if(SceneManager.GetActiveScene().name == "mg_mat" || SceneManager.GetActiveScene().name == "mg_port")
+        {
+            Screen.orientation = ScreenOrientation.Portrait;
+        }
+        else
+        {
+            Screen.orientation = ScreenOrientation.LandscapeRight;
+        }
         //if (!IsOwner) return;
 
         if(Input.GetKeyDown(KeyCode.Space))
@@ -105,32 +118,46 @@ public class JoystickPlayerExample : NetworkBehaviour
     }
 
     public void Jump()
-{
-    //if (!IsOwner) return;
-
-    if (isGrounded)
     {
-        verticalVelocity = Mathf.Sqrt(jumpForce * -2f * gravity);
+        //if (!IsOwner) return;
+
+        if (isGrounded)
+        {
+            verticalVelocity = Mathf.Sqrt(jumpForce * -2f * gravity);
+        }
     }
-}
 
     public void GoToPrivateScene(string privateSceneName)
     {
         if (!IsOwner) return;
 
         HidePlayerForOthersServerRpc();
-        //transform.position = new Vector3(0, 0.55f, 0);
-        StartCoroutine(LoadSceneAdditive(privateSceneName, true));
+        StartCoroutine(LoadSceneAdditive(privateSceneName));
     }
 
     public void ReturnToLobby()
     {
         if (!IsOwner) return;
 
-        //transform.position = new Vector3(0, 0.55f, 0);
         ShowPlayerForOthersServerRpc();
-        StartCoroutine(LoadSceneAdditive("lobby_start", false));
+        
+        // Atenção: passe o nome correto da cena privada que o jogador estava
+        // Você pode querer guardar esse nome em uma variável tipo 'currentPrivateScene'
+        StartCoroutine(UnloadPrivateScene("mg_hist"));
     }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        
+        // Quando spawnar, garante que está visível para todos
+        if (IsOwner)
+        {
+            // Se for o dono, garante que os outros possam ver
+            ShowPlayerForOthersServerRpc();
+        }
+    }
+        //transform.position = new Vector3(0, 0.55f, 0);
 
     [ServerRpc(RequireOwnership = false)]
     private void HidePlayerForOthersServerRpc(ServerRpcParams rpcParams = default)
@@ -139,15 +166,12 @@ public class JoystickPlayerExample : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void HidePlayerForOthersClientRpc(ClientRpcParams rpcParams = default)
+    private void HidePlayerForOthersClientRpc()
     {
+        // Esconde APENAS para outros players, NÃO para o dono
         if (!IsOwner)
         {
-            foreach (var r in GetComponentsInChildren<Renderer>())
-                r.enabled = false;
-
-            foreach (var c in GetComponentsInChildren<Collider>())
-                c.enabled = false;
+            SetPlayerVisibility(false);
         }
     }
 
@@ -158,48 +182,82 @@ public class JoystickPlayerExample : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ShowPlayerForOthersClientRpc(ClientRpcParams rpcParams = default)
+    private void ShowPlayerForOthersClientRpc()
     {
-        
-            foreach (var r in GetComponentsInChildren<Renderer>())
-                r.enabled = true;
-
-            foreach (var c in GetComponentsInChildren<Collider>())
-                c.enabled = true;
-        
+        // Mostra para TODOS (incluindo outros players)
+        if (!IsOwner)
+        {
+            SetPlayerVisibility(true);
+        }
     }
 
-    private IEnumerator LoadSceneAdditive(string sceneName, bool hideOthers)
+    private void SetPlayerVisibility(bool visible)
     {
-        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        foreach (var r in GetComponentsInChildren<Renderer>())
+            r.enabled = visible;
+
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = visible;
+    }
+
+    private IEnumerator LoadSceneAdditive(string sceneName)
+    {
+        float playerOffset = 5000f + (OwnerClientId * 1000f);
+        Vector3 uniquePos = new Vector3(playerOffset, 0f, 0f);
+        lobbyMap.SetActive(false);
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-        //NetworkManager.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-        while (!asyncLoad.isDone)
-            yield return null;
+        while (!asyncLoad.isDone) yield return null;
 
         Scene newScene = SceneManager.GetSceneByName(sceneName);
-        SceneManager.MoveGameObjectToScene(gameObject, newScene);
         SceneManager.SetActiveScene(newScene);
 
-        AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(currentSceneIndex);
+        // Move o cenário do minigame para o slot único desse jogador
+        foreach (GameObject rootObj in newScene.GetRootGameObjects())
+        {
+            rootObj.transform.position = uniquePos;
+        }
 
-        // Define posição padrão (pode ajustar)
-        transform.position = new Vector3(0, 0.55f, 0);
+        // Teleporta o jogador para o seu slot único
+        controller.enabled = false;
+        transform.position = uniquePos + new Vector3(0, 0.55f, 0); 
+        controller.enabled = true;
+    }
 
+    private IEnumerator UnloadPrivateScene(string sceneName)
+    {
+        lobbyMap.SetActive(true);
+        GameObject rootObj = GameObject.Find("move away");
+        rootObj.SetActive(false);
+        // 1. Descarrega APENAS a cena do minigame/privada
+        AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(sceneName);
+        if(lobbyMap != null) lobbyMap.SetActive(true);
         while (!asyncUnload.isDone)
             yield return null;
+
+        // 2. Define o lobby novamente como a cena ativa
+        Scene lobbyScene = SceneManager.GetSceneByName("lobby_start");
+        if(lobbyScene.IsValid())
+        {
+            SceneManager.SetActiveScene(lobbyScene);
+        }
+
+        // 3. Volta o player para a posição inicial no lobby
+        transform.position = new Vector3(0, 0.55f, 0); 
+        // Pode usar a 'last_pos' que você já guarda no script!
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        if(!IsOwner) return;
         Debug.Log(other.name);
         if (other.CompareTag("mg1"))
         {
-            GoToPrivateScene("mg1");
+            GoToPrivateScene("mg_hist");
         }
         else if (other.CompareTag("back"))
         {
+            Debug.Log("colidiu com a volta");
             ReturnToLobby();
         }
 
@@ -213,6 +271,12 @@ public class JoystickPlayerExample : NetworkBehaviour
     }
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        if(!IsOwner) return;
+        if (hit.gameObject.CompareTag("back"))
+        {
+            Debug.Log("colidiu com a volta");
+            ReturnToLobby();
+        }
         string state = hit.gameObject.name[..2];
         int current_state = state_check(state);
         Animator map = GameObject.Find("map").GetComponent<Animator>();
