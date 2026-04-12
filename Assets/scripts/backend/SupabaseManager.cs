@@ -9,48 +9,74 @@ public class SupabaseManager : MonoBehaviour
 {
     public static SupabaseManager Instance;
 
-    [Header("Supabase Settings")]
-    public string supabaseUrl;
-    public string anonKey;    // Start is called before the first frame update
+    string url = "https://oxodeorehirrwdzcvewx.supabase.co/rest/v1/players";
+    string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94b2Rlb3JlaGlycndkemN2ZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjI1ODEsImV4cCI6MjA5MDEzODU4MX0.qXaHKJD356N71RDh-tygUE79Za-v6zaHOe7NTn2nj30"; 
     void Awake()
     {
         Instance = this;
     }
-    
-    public void InsertPlayer(string username)
+
+    private void Start() 
     {
-        StartCoroutine(InsertPlayerCoroutine(username));
+        //InsertPlayer("tonizin", 200);
+        GetPlayers();    
     }
-    IEnumerator InsertPlayerCoroutine(string username)
+
+    public void GetPlayers()
     {
-        string url = supabaseUrl + "/rest/v1/players";
-        string json = "{\"username\":\""+ username + "\", \"highscore\":0}";
+        StartCoroutine(GetPlayersRequest());
+    }
 
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
+    IEnumerator GetPlayersRequest()
+    {
+        UnityWebRequest request = UnityWebRequest.Get(url + "?select=*");
 
-        request.SetRequestHeader("Content=Type", "application/json");
-        request.SetRequestHeader("apikey", anonKey);
-        request.SetRequestHeader("Authorization", "Bearer" + anonKey);
-        request.SetRequestHeader("Prefer", "return=minimal");
+        request.SetRequestHeader("apikey", apiKey);
+        request.SetRequestHeader("Authorization", "Bearer" + apiKey);
 
         yield return request.SendWebRequest();
 
         if(request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log("jogador inserido com sucesso");
+            Debug.Log("response: " + request.downloadHandler.text);
         }
         else
         {
             Debug.LogError("Error: " + request.error);
-            Debug.LogError(request.downloadHandler.text);
         }
     }
-    void Start()
+    
+    public void InsertPlayer(string username, int score)
     {
+        Debug.Log("chegou 1");
+        StartCoroutine(InsertPlayerCoroutine(username, score));
+    }
+    IEnumerator InsertPlayerCoroutine(string username, int score)
+    {
+        Debug.Log("chegou 2");
+        string json = "{\"username\":\""+ username + "\", \"highscore\":" + score + "}";
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("apikey", apiKey);
+        request.SetRequestHeader("Authorization", "Bearer " + apiKey);
+        request.SetRequestHeader("Prefer", "return=minimal");
+
+        yield return request.SendWebRequest();
+
+        Debug.Log("Insert Result: " + request.result);
+        Debug.Log("Insert Code: " + request.responseCode);
         
+
+        if(request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Insert Error: " + request.downloadHandler.text);
+        }
     }
 
     // Update is called once per frame
