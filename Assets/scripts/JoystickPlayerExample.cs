@@ -37,10 +37,12 @@ public class JoystickPlayerExample : NetworkBehaviour
             DontDestroyOnLoad(gameObject);
             variableJoystick = FindObjectOfType<VariableJoystick>();
         }
+
     }
 
     private void Update()
     {
+        variableJoystick = FindObjectOfType<VariableJoystick>();
         if(!IsOwner) return;
         if(SceneManager.GetActiveScene().name == "mg_mat" || SceneManager.GetActiveScene().name == "mg_port")
         {
@@ -75,7 +77,7 @@ public class JoystickPlayerExample : NetworkBehaviour
         {
             if(SceneManager.GetActiveScene().name == "mg_geo")
             {
-                speed = 23f;
+                speed = 20f;
                 Vector3 camForward = Camera.main.transform.forward;
                 Vector3 camRight = Camera.main.transform.right;
 
@@ -96,7 +98,7 @@ public class JoystickPlayerExample : NetworkBehaviour
                     transform.rotation = Quaternion.Slerp(
                         transform.rotation,
                         targetRotation,
-                        (rotationSpeed/5) * Time.deltaTime
+                        rotationSpeed/3 * Time.deltaTime
                     );
                 }
             }
@@ -203,7 +205,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     private IEnumerator LoadSceneAdditive(string sceneName)
     {
         float playerOffset = 5000f + (OwnerClientId * 1000f);
-        Vector3 uniquePos = new Vector3(playerOffset, 0f, 0f);
+        Vector3 uniquePos = new Vector3(0f, 0f, 0f);
         lobbyMap.SetActive(false);
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
@@ -220,7 +222,7 @@ public class JoystickPlayerExample : NetworkBehaviour
 
         // Teleporta o jogador para o seu slot único
         controller.enabled = false;
-        transform.position = uniquePos + new Vector3(0, 0.55f, 0); 
+        transform.position = uniquePos + new Vector3(0, 2.3f, 0); 
         controller.enabled = true;
     }
 
@@ -253,7 +255,7 @@ public class JoystickPlayerExample : NetworkBehaviour
         Debug.Log(other.name);
         if (other.CompareTag("mg1"))
         {
-            GoToPrivateScene("mg_hist");
+            GoToPrivateScene("mg_geo");
         }
         else if (other.CompareTag("back"))
         {
