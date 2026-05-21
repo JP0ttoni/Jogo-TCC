@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class pick_game : MonoBehaviour
 {
@@ -21,10 +22,13 @@ public class pick_game : MonoBehaviour
     public int score = 0;
     public bool play = true;
     public int rigth_count = 0;
+    Sprite bottle_sprt;
+    Sprite glass_sprt;
     // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(launch());
+        StartCoroutine(set_image());
     }
 
     // Update is called once per frame
@@ -55,7 +59,16 @@ public class pick_game : MonoBehaviour
                 var text_button = newButton.GetComponentInChildren<TMP_Text>();
                 if(choose == right_button)
                 {
-                    text_button.text = right[Random.Range(0,right.Length)];
+                    var rand_num = Random.Range(0,right.Length);
+                    text_button.text = right[rand_num];
+                    if(right[rand_num] == "VIDRO")
+                    {                        
+                        newButton.GetComponent<Button>().image.sprite = bottle_sprt;
+                    }
+                    else
+                    {
+                        newButton.GetComponent<Button>().image.sprite = glass_sprt;
+                    }
                     rigth_count++;
                 }
                 else
@@ -72,6 +85,38 @@ public class pick_game : MonoBehaviour
             yield return new WaitForSeconds(wait_time);
             StartCoroutine(launch());
         }
+    }
+
+    IEnumerator set_image()
+    {
+        string url = "";
+        
+        url = "https://i.pinimg.com/736x/79/ac/28/79ac288e8245ec913d3270848ad155b1.jpg";
+        UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request.SendWebRequest();
+
+        Texture2D texture = DownloadHandlerTexture.GetContent(request);
+
+        bottle_sprt = Sprite.Create(
+            texture,
+            new Rect(0,0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+        url = "https://img.freepik.com/vetores-gratis/estilhacos-realistas-de-vidro-quebrado-transparente_1284-9417.jpg?semt=ais_hybrid&w=740&q=80";
+        UnityWebRequest request2 = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request2.SendWebRequest();
+
+        Texture2D texture2 = DownloadHandlerTexture.GetContent(request2);
+
+        glass_sprt = Sprite.Create(
+            texture2,
+            new Rect(0,0, texture2.width, texture2.height),
+            new Vector2(0.5f, 0.5f)
+        );
+        
     }
 
     void end_game()

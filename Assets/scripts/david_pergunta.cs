@@ -27,6 +27,7 @@ public class david_pergunta : MonoBehaviour
     public TextMeshProUGUI points_txt; 
     public GameObject canvas_question;
     private float[] positions = {95f, 27.25f, -34f, -96f};
+    JArray request_array;
 
     string url_base =
         "https://oxodeorehirrwdzcvewx.supabase.co/rest/v1/";
@@ -36,6 +37,7 @@ public class david_pergunta : MonoBehaviour
     void Start()
     {
         change_pos();
+        StartCoroutine(get_question());
         StartCoroutine(change_text());
         
     }
@@ -87,28 +89,31 @@ public class david_pergunta : MonoBehaviour
         }
 
     }
-
+    IEnumerator get_question()
+    {
+        var url = url_base + "exam?grade_id=eq.1&subject_id=eq.1";
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("apikey", apiKey);
+        yield return request.SendWebRequest();
+        string request_json = request.downloadHandler.text;
+        request_array = JArray.Parse(request_json);
+        Debug.LogError(request_array[0].ToSafeString());
+    }
     IEnumerator change_text()
     {
         var req_question = question + 1;
-        var url = url_base + "exam?id=eq." + req_question;
-        var url_options = url_base + "exam_options?question_id=eq." + req_question;
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        request.SetRequestHeader("apikey", apiKey);
+        var url_options = url_base + "exam_options?subject_id=eq.1&question_id=eq." + req_question;
         UnityWebRequest req_options = UnityWebRequest.Get(url_options);
         req_options.SetRequestHeader("apikey", apiKey);
 
-        yield return request.SendWebRequest();
         yield return req_options.SendWebRequest();
 
-        string request_json = request.downloadHandler.text;
         string options_json = req_options.downloadHandler.text;
 
-        JArray request_array = JArray.Parse(request_json);
         JArray options_array = JArray.Parse(options_json);
         
-        question_text.text = request_array[0]["pergunta"].ToString();
-        right_answer_text.GetComponentInChildren<TextMeshProUGUI>().text = request_array[0]["resposta"].ToString();
+        question_text.text = request_array[question]["pergunta"].ToString();
+        right_answer_text.GetComponentInChildren<TextMeshProUGUI>().text = request_array[question]["resposta"].ToString();
         for (int i = 0; i < options.Length; i++)
         {
             options[i].GetComponentInChildren<TextMeshProUGUI>().text = options_array[i]["texto"].ToString();
