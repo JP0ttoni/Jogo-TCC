@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using Unity.VisualScripting;
 
 public class pick_game : MonoBehaviour
 {
@@ -24,10 +25,15 @@ public class pick_game : MonoBehaviour
     public int rigth_count = 0;
     Sprite bottle_sprt;
     Sprite glass_sprt;
+    Sprite window_sprt;
+    Sprite mirror_sprt;
+    Sprite chair_sprt;
+    Sprite door_sprt;
+    Sprite guitar_sprt;
+    Sprite wood_sprt;
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(launch());
         StartCoroutine(set_image());
     }
 
@@ -60,20 +66,56 @@ public class pick_game : MonoBehaviour
                 if(choose == right_button)
                 {
                     var rand_num = Random.Range(0,right.Length);
-                    text_button.text = right[rand_num];
+                    text_button.text = "";//right[rand_num];
                     if(right[rand_num] == "VIDRO")
                     {                        
                         newButton.GetComponent<Button>().image.sprite = bottle_sprt;
+                        //newButton.GetComponent<Image>().enabled = false;
                     }
-                    else
+
+                    if(right[rand_num] == "COPO")
                     {
                         newButton.GetComponent<Button>().image.sprite = glass_sprt;
+                        //newButton.GetComponent<Image>().enabled = false;
+                    }
+
+                    if(right[rand_num] == "JANELA")
+                    {
+                        newButton.GetComponent<Button>().image.sprite = window_sprt;
+                        //newButton.GetComponent<Image>().enabled = false;
+                    }
+
+                    if(right[rand_num] == "ESPELHO")
+                    {
+                        newButton.GetComponent<Button>().image.sprite = mirror_sprt;
+                        //newButton.GetComponent<Image>().enabled = false;
                     }
                     rigth_count++;
                 }
                 else
                 {
-                    text_button.text = wrong[Random.Range(0,wrong.Length)];
+                    var wrong_num = Random.Range(0,wrong.Length);
+                    text_button.text = "";//wrong[wrong_num];
+
+                    if(wrong[wrong_num] == "CADEIRA")
+                    {
+                        newButton.GetComponent<Button>().image.sprite = chair_sprt;
+                    }
+
+                    if(wrong[wrong_num] == "PORTA")
+                    {
+                        newButton.GetComponent<Button>().image.sprite = door_sprt;
+                    }
+
+                    if(wrong[wrong_num] == "VIOLÃO")
+                    {
+                        newButton.GetComponent<Button>().image.sprite = guitar_sprt;
+                    }
+
+                    if(wrong[wrong_num] == "TABUA")
+                    {
+                        newButton.GetComponent<Button>().image.sprite = wood_sprt;
+                    }
                 }
 
                 i++;
@@ -91,7 +133,7 @@ public class pick_game : MonoBehaviour
     {
         string url = "";
         
-        url = "https://i.pinimg.com/736x/79/ac/28/79ac288e8245ec913d3270848ad155b1.jpg";
+        url = "https://freepngimg.com/save/143539-water-glass-bottle-empty-png-image-high-quality/2000x2156";
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
 
         yield return request.SendWebRequest();
@@ -104,7 +146,7 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://img.freepik.com/vetores-gratis/estilhacos-realistas-de-vidro-quebrado-transparente_1284-9417.jpg?semt=ais_hybrid&w=740&q=80";
+        url = "https://static.vecteezy.com/system/resources/thumbnails/045/700/446/small/plan-mirror-glass-free-png.png";
         UnityWebRequest request2 = UnityWebRequestTexture.GetTexture(url);
 
         yield return request2.SendWebRequest();
@@ -116,7 +158,85 @@ public class pick_game : MonoBehaviour
             new Rect(0,0, texture2.width, texture2.height),
             new Vector2(0.5f, 0.5f)
         );
-        
+
+        url = "https://static.vecteezy.com/system/resources/thumbnails/050/755/080/small/stacked-glass-sheets-on-transparent-background-free-png.png";
+        UnityWebRequest request3 = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request3.SendWebRequest();
+
+        Texture2D texture3 = DownloadHandlerTexture.GetContent(request3);
+
+        window_sprt = Sprite.Create(
+            texture3,
+            new Rect(0,0, texture3.width, texture3.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+        url = "https://static.vecteezy.com/system/resources/thumbnails/050/281/094/small/elegant-ornate-gold-mirror-displayed-isolated-on-transparent-background-png.png";
+        UnityWebRequest request4 = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request4.SendWebRequest();
+
+        Texture2D texture4 = DownloadHandlerTexture.GetContent(request4);
+
+        mirror_sprt = Sprite.Create(
+            texture4,
+            new Rect(0,0, texture4.width, texture4.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+        url = "https://rosepng.com/wp-content/uploads/elementor/thumbs/s11728_chair_silated_on_white_background_-stylize_200_-v_6_ad64375a-e160-427c-bf7e-f611192c39fe_1-photoroom-png-photoroom_11zon-qkk4munt94ojj1jwyji9bv1cla04mifi57h6707ogw.png";
+        UnityWebRequest request_op = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request_op.SendWebRequest();
+
+        Texture2D texture_op = DownloadHandlerTexture.GetContent(request_op);
+
+        chair_sprt = Sprite.Create(
+            texture_op,
+            new Rect(0,0, texture_op.width, texture_op.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+        url = "https://static.vecteezy.com/system/resources/thumbnails/058/662/350/small/wooden-door-emoji-3d-render-isolated-on-white-background-png.png";
+        UnityWebRequest request2_op = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request2_op.SendWebRequest();
+
+        Texture2D texture2_op = DownloadHandlerTexture.GetContent(request2_op);
+
+        door_sprt = Sprite.Create(
+            texture2_op,
+            new Rect(0,0, texture2_op.width, texture2_op.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+        url = "https://static.vecteezy.com/system/resources/thumbnails/041/450/716/small/ai-generated-classic-acoustic-guitar-musical-instrument-png.png";
+        UnityWebRequest request3_op = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request3_op.SendWebRequest();
+
+        Texture2D texture3_op = DownloadHandlerTexture.GetContent(request3_op);
+
+        guitar_sprt = Sprite.Create(
+            texture3_op,
+            new Rect(0,0, texture3_op.width, texture3_op.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+        url = "https://static.vecteezy.com/system/resources/thumbnails/023/495/045/small/stack-of-wood-in-image-png.png";
+        UnityWebRequest request4_op = UnityWebRequestTexture.GetTexture(url);
+
+        yield return request4_op.SendWebRequest();
+
+        Texture2D texture4_op = DownloadHandlerTexture.GetContent(request4_op);
+
+        wood_sprt = Sprite.Create(
+            texture4_op,
+            new Rect(0,0, texture4_op.width, texture4_op.height),
+            new Vector2(0.5f, 0.5f)
+        );
+        StartCoroutine(launch());
     }
 
     void end_game()
