@@ -102,7 +102,7 @@ public class david_pergunta : MonoBehaviour
     IEnumerator change_text()
     {
         var req_question = question + 1;
-        var url_options = url_base + "exam_options?subject_id=eq.1&question_id=eq." + req_question;
+        var url_options = url_base + "exam_options?subject_id=eq.1&question_num=eq." + req_question;
         UnityWebRequest req_options = UnityWebRequest.Get(url_options);
         req_options.SetRequestHeader("apikey", apiKey);
 

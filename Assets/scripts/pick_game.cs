@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using Unity.VisualScripting;
+using Newtonsoft.Json.Linq;
 
 public class pick_game : MonoBehaviour
 {
@@ -31,6 +32,11 @@ public class pick_game : MonoBehaviour
     Sprite door_sprt;
     Sprite guitar_sprt;
     Sprite wood_sprt;
+    int group_num;
+
+    string url_base =
+        "https://oxodeorehirrwdzcvewx.supabase.co/rest/v1/";
+    string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94b2Rlb3JlaGlycndkemN2ZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjI1ODEsImV4cCI6MjA5MDEzODU4MX0.qXaHKJD356N71RDh-tygUE79Za-v6zaHOe7NTn2nj30";
     // Start is called before the first frame update
     void Start()
     {
@@ -131,10 +137,30 @@ public class pick_game : MonoBehaviour
 
     IEnumerator set_image()
     {
-        string url = "";
+        var url = url_base + "subjects?id=eq.2";
+        UnityWebRequest image_url = UnityWebRequest.Get(url);
+        image_url.SetRequestHeader("apikey", apiKey);
+        yield return image_url.SendWebRequest();
+        string image_json = image_url.downloadHandler.text;
+        JArray image_array = JArray.Parse(image_json);
+        int group_range = int.Parse(image_array[0]["question_num"].ToString());
+        group_num = Random.Range(1, group_range + 1);
+
+        url = url_base + "questions?group_id=eq." + group_num + "&grade_id=eq.1&subject_id=eq.2";
+        image_url = UnityWebRequest.Get(url);
+        image_url.SetRequestHeader("apikey", apiKey);
+
+        yield return image_url.SendWebRequest();
+
+        image_json = image_url.downloadHandler.text;
+
+        image_array = JArray.Parse(image_json);
         
-        url = "https://freepngimg.com/save/143539-water-glass-bottle-empty-png-image-high-quality/2000x2156";
-        UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+        question.text = image_array[0]["pergunta"].ToString();
+
+        string request_url = image_array[0]["resposta"].ToString();
+    
+        UnityWebRequest request = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request.SendWebRequest();
 
@@ -146,8 +172,8 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://static.vecteezy.com/system/resources/thumbnails/045/700/446/small/plan-mirror-glass-free-png.png";
-        UnityWebRequest request2 = UnityWebRequestTexture.GetTexture(url);
+        request_url = image_array[1]["resposta"].ToString();
+        UnityWebRequest request2 = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request2.SendWebRequest();
 
@@ -159,8 +185,8 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://static.vecteezy.com/system/resources/thumbnails/050/755/080/small/stacked-glass-sheets-on-transparent-background-free-png.png";
-        UnityWebRequest request3 = UnityWebRequestTexture.GetTexture(url);
+        request_url = image_array[2]["resposta"].ToString();
+        UnityWebRequest request3 = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request3.SendWebRequest();
 
@@ -172,8 +198,8 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://static.vecteezy.com/system/resources/thumbnails/050/281/094/small/elegant-ornate-gold-mirror-displayed-isolated-on-transparent-background-png.png";
-        UnityWebRequest request4 = UnityWebRequestTexture.GetTexture(url);
+        request_url = image_array[3]["resposta"].ToString();
+        UnityWebRequest request4 = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request4.SendWebRequest();
 
@@ -185,8 +211,16 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://rosepng.com/wp-content/uploads/elementor/thumbs/s11728_chair_silated_on_white_background_-stylize_200_-v_6_ad64375a-e160-427c-bf7e-f611192c39fe_1-photoroom-png-photoroom_11zon-qkk4munt94ojj1jwyji9bv1cla04mifi57h6707ogw.png";
-        UnityWebRequest request_op = UnityWebRequestTexture.GetTexture(url);
+        //errrados
+
+        url = url_base + "question_options?group_id=eq." + 1 + "&question_id=eq.2&grade_id=eq.1";
+        image_url = UnityWebRequest.Get(url);
+        image_url.SetRequestHeader("apikey", apiKey);
+        yield return image_url.SendWebRequest();
+        image_json = image_url.downloadHandler.text;
+        image_array = JArray.Parse(image_json);
+        request_url = image_array[0]["texto"].ToString();
+        UnityWebRequest request_op = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request_op.SendWebRequest();
 
@@ -198,8 +232,8 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://static.vecteezy.com/system/resources/thumbnails/058/662/350/small/wooden-door-emoji-3d-render-isolated-on-white-background-png.png";
-        UnityWebRequest request2_op = UnityWebRequestTexture.GetTexture(url);
+        request_url = image_array[1]["texto"].ToString();
+        UnityWebRequest request2_op = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request2_op.SendWebRequest();
 
@@ -211,8 +245,8 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://static.vecteezy.com/system/resources/thumbnails/041/450/716/small/ai-generated-classic-acoustic-guitar-musical-instrument-png.png";
-        UnityWebRequest request3_op = UnityWebRequestTexture.GetTexture(url);
+        request_url = image_array[2]["texto"].ToString();
+        UnityWebRequest request3_op = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request3_op.SendWebRequest();
 
@@ -224,8 +258,8 @@ public class pick_game : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
-        url = "https://static.vecteezy.com/system/resources/thumbnails/023/495/045/small/stack-of-wood-in-image-png.png";
-        UnityWebRequest request4_op = UnityWebRequestTexture.GetTexture(url);
+        request_url = image_array[3]["texto"].ToString();
+        UnityWebRequest request4_op = UnityWebRequestTexture.GetTexture(request_url);
 
         yield return request4_op.SendWebRequest();
 

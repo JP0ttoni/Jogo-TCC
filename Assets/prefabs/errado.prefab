@@ -284,7 +284,7 @@ MonoBehaviour:
   minForceX: -150
   maxForceX: 150
   minForceY: 700
-  maxForceY: 900
+  maxForceY: 800
 --- !u!50 &-3853012577756017999
 Rigidbody2D:
   serializedVersion: 4

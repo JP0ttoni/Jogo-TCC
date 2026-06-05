@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/lobby_start.unity
     guid: 414bddd31c5ea4f4c9f5d1452e5bbb41
   - enabled: 1
+    path: Assets/Scenes/mg_hist.unity
+    guid: 34d08910d17ec9148b563b62037e0547
+  - enabled: 1
     path: Assets/Scenes/mg_port.unity
     guid: b1fcd4d8183b37a4faa6414a049d74b0
   - enabled: 1
@@ -23,9 +26,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/mg_bio.unity
     guid: 06a482a4bf69f6545b7652fcb05a0993
-  - enabled: 1
-    path: Assets/Scenes/mg_hist.unity
-    guid: 34d08910d17ec9148b563b62037e0547
   - enabled: 0
     path: Assets/Scenes/lobby_list.unity
     guid: 7d6fd23f99b3be046a051e4971a49e84
