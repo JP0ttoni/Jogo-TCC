@@ -50,6 +50,7 @@ public class pick_game : MonoBehaviour
         {
             end_game();
         }
+
         score_text.text = score.ToString();
     }
 
@@ -291,6 +292,10 @@ public class pick_game : MonoBehaviour
         }
         else
         {
+            if(score < 0)
+            {
+                score = 0;
+            }
             question.text = "faltou: " + (rigth_count-score).ToString() + " pontos";
         }
         exit.SetActive(true);

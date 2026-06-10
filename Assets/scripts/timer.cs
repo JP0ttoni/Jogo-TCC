@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class timer : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class timer : MonoBehaviour
 
     public GameObject death;
 
-    public GameObject death_canvas;
+    public GameObject death_canvas, won_canvas;
 
     private bool dead,won = false;
 
@@ -54,6 +55,10 @@ public class timer : MonoBehaviour
             case "mg_geo":
                 if(dead || won)
                 {
+                    if(won)
+                    {
+                        won_canvas.SetActive(true);
+                    }
                     time = 0;    
                 }
                 time_text.text = time.ToString();
@@ -141,6 +146,7 @@ public class timer : MonoBehaviour
         reset_obj(estados);
         var quest = GameObject.Find("quest txt").GetComponent<quest>();
         quest.index += 1;
+        //Debug.Log(quest.objective_list.Length + " : " + quest.index);
         if(quest.objective_list.Length == quest.index)
         {
             won = true;
