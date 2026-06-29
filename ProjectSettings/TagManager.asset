@@ -12,6 +12,10 @@ TagManager:
   - Ground
   - estados
   - death
+  - mg2
+  - mg3
+  - mg4
+  - mg5
   layers:
   - Default
   - TransparentFX
@@ -48,4 +52,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UI
+    uniqueID: 333563303
     locked: 0

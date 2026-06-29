@@ -25,6 +25,12 @@ public class JoystickPlayerExample : NetworkBehaviour
     public Vector3 last_pos;
     public bool death = false;
     public GameObject lobbyMap;
+    private bool block_mg1 = false;
+    private bool block_mg2 = false;
+    private bool block_mg3 = false;
+    private bool block_mg4 = false;
+    private bool block_mg5 = false;
+    public string current_scene;
 
     private Vector3 minigameOffset = new Vector3(5000f, 0f, 0f);
 
@@ -43,7 +49,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     private void Update()
     {
         variableJoystick = FindObjectOfType<VariableJoystick>();
-        if(!IsOwner) return;
+        //if(!IsOwner) return;
         if(SceneManager.GetActiveScene().name == "mg_mat" || SceneManager.GetActiveScene().name == "mg_port")
         {
             Screen.orientation = ScreenOrientation.Portrait;
@@ -145,7 +151,7 @@ public class JoystickPlayerExample : NetworkBehaviour
         
         // Atenção: passe o nome correto da cena privada que o jogador estava
         // Você pode querer guardar esse nome em uma variável tipo 'currentPrivateScene'
-        StartCoroutine(UnloadPrivateScene("mg_hist"));
+        StartCoroutine(UnloadPrivateScene(current_scene));
     }
 
     public override void OnNetworkSpawn()
@@ -205,7 +211,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     private IEnumerator LoadSceneAdditive(string sceneName)
     {
         float playerOffset = 5000f + (OwnerClientId * 1000f);
-        Vector3 uniquePos = new Vector3(0f, 0f, 0f);
+        Vector3 uniquePos = new Vector3(961.4f, 534.5f, 0f);
         lobbyMap.SetActive(false);
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
@@ -245,7 +251,16 @@ public class JoystickPlayerExample : NetworkBehaviour
         }
 
         // 3. Volta o player para a posição inicial no lobby
-        transform.position = new Vector3(0, 0.55f, 0); 
+        CharacterController cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        // Aplica a posição desejada
+        transform.position = new Vector3(0, 2f, 0); 
+
+        // Aguarda o fim do frame para a física do Unity processar a nova posição
+        yield return new WaitForEndOfFrame();
+
+        if (cc != null) cc.enabled = true; 
         // Pode usar a 'last_pos' que você já guarda no script!
     }
 
@@ -253,9 +268,31 @@ public class JoystickPlayerExample : NetworkBehaviour
     {
         if(!IsOwner) return;
         Debug.Log(other.name);
-        if (other.CompareTag("mg1"))
+        if (other.CompareTag("mg1") && !block_mg1)
         {
+            current_scene = "mg_hist";
+            GoToPrivateScene("mg_hist");
+            block_mg1 = true;
+        }else if (other.CompareTag("mg2") && !block_mg2)
+        {
+            current_scene = "mg_bio";
+            GoToPrivateScene("mg_bio");
+            block_mg2 = true;
+        }else if (other.CompareTag("mg3") && !block_mg3)
+        {
+            current_scene = "mg_geo";
             GoToPrivateScene("mg_geo");
+            block_mg3 = true;
+        }else if (other.CompareTag("mg4") && !block_mg4)
+        {
+            current_scene = "mg_mat";
+            GoToPrivateScene("mg_mat");
+            block_mg4 = true;
+        }else if (other.CompareTag("mg5") && !block_mg5)
+        {
+            current_scene = "mg_port";
+            GoToPrivateScene("mg_port");
+            block_mg5 = true;
         }
         else if (other.CompareTag("back"))
         {

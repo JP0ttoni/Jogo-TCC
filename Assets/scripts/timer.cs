@@ -20,6 +20,9 @@ public class timer : MonoBehaviour
 
     public GameObject death_canvas, won_canvas;
 
+    public TextMeshProUGUI score_txt;
+
+    public GameObject end_game_mat;
     private bool dead,won = false;
 
 
@@ -48,6 +51,9 @@ public class timer : MonoBehaviour
                         Destroy(obj);
                     }
 
+                    end_game_mat.SetActive(true);
+                    score_txt.text = "Sua pontuação é: " + score;
+
                     Debug.Log("pontuação: " + score);
                 }
                 break;
@@ -70,7 +76,7 @@ public class timer : MonoBehaviour
                 {
                     death.SetActive(true);
                     trigger = false;
-                    time_text.color = Color.white;
+                    time_text.color = Color.black;
                     string objective = GameObject.Find("quest txt").GetComponent<quest>().objective;
                     DestroyAllChildren(GameObject.Find("estados").GetComponent<Transform>(), objective);
                     Invoke(nameof(wait_for_reset), 3f);

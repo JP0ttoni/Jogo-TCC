@@ -26,7 +26,8 @@ public class david_pergunta : MonoBehaviour
     public GameObject right;
     public TextMeshProUGUI points_txt; 
     public GameObject canvas_question;
-    private float[] positions = {95f, 27.25f, -34f, -96f};
+    public GameObject default_canvas;
+    private float[] positions = {96.3f, 19.1f, -57.1f, -137.2f};
     JArray request_array;
 
     string url_base =
@@ -50,12 +51,14 @@ public class david_pergunta : MonoBehaviour
         {
             questions_object.SetActive(true);
             canvas_question.SetActive(true);
+            default_canvas.SetActive(false);
             cam.enabled = true;
             
         }
         else
         {
             canvas_question.SetActive(false);
+            default_canvas.SetActive(true);
             cam.enabled = false;
         }
 

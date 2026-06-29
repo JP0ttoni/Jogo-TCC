@@ -46,8 +46,13 @@ public class pick_game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(rigth_count >= 25)
+        if (score < 0)
         {
+            score = 0;
+        }
+        if(rigth_count >= 24)
+        {
+            Debug.Log("clica");
             end_game();
         }
 
@@ -281,7 +286,7 @@ public class pick_game : MonoBehaviour
 
         foreach (GameObject obj in allObjects)
         {
-            if (obj.name.Contains("Clone"))
+            if (obj.name.Contains("Clone") && !obj.name.Contains("Player"))
             {
                 return;
             }
@@ -289,6 +294,7 @@ public class pick_game : MonoBehaviour
         if(score == rigth_count)
         {
             question.text = "você acertou todos os objetos!!";
+            exit.SetActive(true);
         }
         else
         {
@@ -297,7 +303,7 @@ public class pick_game : MonoBehaviour
                 score = 0;
             }
             question.text = "faltou: " + (rigth_count-score).ToString() + " pontos";
+            exit.SetActive(true);
         }
-        exit.SetActive(true);
     }
 }
