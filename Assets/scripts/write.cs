@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 public class write : MonoBehaviour
 {
@@ -12,15 +15,44 @@ public class write : MonoBehaviour
     private string answer = "vogal";
     public string current_answer = "";
     public Sprite outline, plain;
+    public TextMeshProUGUI tip;
+    public TextMeshProUGUI answer_txt;
+
+    string url_base =
+        "https://oxodeorehirrwdzcvewx.supabase.co/rest/v1/";
+
+    string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94b2Rlb3JlaGlycndkemN2ZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjI1ODEsImV4cCI6MjA5MDEzODU4MX0.qXaHKJD356N71RDh-tygUE79Za-v6zaHOe7NTn2nj30";
+    
     
     // Start is called before the first frame update
     void Start()
     {
+        StartCoroutine(getinfo());
         Screen.orientation = ScreenOrientation.Portrait;
+        father = GameObject.Find("row" + word);
+    }
+
+    IEnumerator getinfo()
+    {
+        var url = url_base + "questions?grade_id=eq.1&subject_id=eq.4";
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("apikey", apiKey);
+        yield return request.SendWebRequest();
+        string request_json = request.downloadHandler.text;
+        var request_array = JArray.Parse(request_json);
+        var rand = Random.Range(0, request_array.Count);
+        Debug.Log(rand);
+        tip.text = request_array[rand]["pergunta"].ToString();
+        answer = request_array[rand]["resposta"].ToString();
+        answer_txt.text = answer;
     }
 
     // Update is called once per frame
     void Update()
+    {
+    }
+
+    void atualizar()
     {
         father = GameObject.Find("row" + word);
         foreach(Transform child in father.transform)
@@ -28,6 +60,11 @@ public class write : MonoBehaviour
             if(child.name.Contains("bl"))
             {
                 var img = child.GetComponent<Image>();
+                if (img == null)
+                {
+                  Debug.Log(child.name + " não tem imagem");  
+                  continue;
+                } 
                 img.sprite = outline;
                 img.color = Color.gray;
             }
@@ -36,6 +73,7 @@ public class write : MonoBehaviour
                 child.GetComponent<Image>().color = Color.white;
             }
         }
+        
     }
 
     void GetAllChildren(Transform parent)
@@ -55,10 +93,12 @@ public class write : MonoBehaviour
                 child.GetComponent<TextMeshProUGUI>().text = current_letter;
                 current_answer += current_letter;
                 letter++;
+                atualizar();
                 return;
             }
             
         }
+
     }
 
     public void delete()
@@ -73,6 +113,7 @@ public class write : MonoBehaviour
             {
                 child.GetComponent<TextMeshProUGUI>().text = " ";
                 current_answer = current_answer.Remove(current_answer.Length - 1);
+                atualizar();
                 return;
             }
         }
@@ -172,5 +213,52 @@ public class write : MonoBehaviour
         }
         word++;
         letter = 0;
+        atualizar();
+    }
+
+    public void score_button()
+    {
+        StartCoroutine(set_score(GameObject.Find("NetworkManager").GetComponent<test_lobby>().playerName));
+    }
+    public struct EnviarPontosPorNomeData
+    {
+        public string nome_completo;
+        public float pontos_a_adicionar;
+    }
+
+    IEnumerator set_score(string player)
+    {
+        EnviarPontosPorNomeData dados = new EnviarPontosPorNomeData { 
+            nome_completo = player, 
+            pontos_a_adicionar = 30f 
+        };
+        var url = url_base + "rpc/adicionar_pontuacao_por_nome";
+        string jsonDados = JsonUtility.ToJson(dados);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonDados);
+
+        // 2. Configura a requisição POST
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            // Headers obrigatórios
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("apikey", apiKey);
+            request.SetRequestHeader("Authorization", "Bearer " + apiKey);
+
+            // 3. Envia e aguarda
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"Sucesso! +5 pontos adicionados para o estudante: {player}");
+            }
+            else
+            {
+                Debug.LogError("Erro ao adicionar pontos por nome: " + request.error);
+                Debug.LogError("Detalhes: " + request.downloadHandler.text);
+            }
+        }
     }
 }

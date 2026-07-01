@@ -340,6 +340,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1940592762}
+        m_TargetAssemblyTypeName: timer, Assembly-CSharp
+        m_MethodName: score_button
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 58287769}
         m_TargetAssemblyTypeName: go_back, Assembly-CSharp
         m_MethodName: back_to_lobby
@@ -1739,6 +1751,7 @@ GameObject:
   - component: {fileID: 318713422}
   - component: {fileID: 318713421}
   - component: {fileID: 318713420}
+  - component: {fileID: 318713423}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -1809,7 +1822,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 318713421}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1940592762}
+        m_TargetAssemblyTypeName: timer, Assembly-CSharp
+        m_MethodName: score_button
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 318713423}
+        m_TargetAssemblyTypeName: go_back, Assembly-CSharp
+        m_MethodName: back_to_lobby
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &318713421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1848,6 +1885,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 318713418}
   m_CullTransparentMesh: 1
+--- !u!114 &318713423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 318713418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92d6790b16436aa4c8c550926ef1c4df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &330736948
 GameObject:
   m_ObjectHideFlags: 0
@@ -7911,6 +7960,7 @@ GameObject:
   - component: {fileID: 1527227551}
   - component: {fileID: 1527227550}
   - component: {fileID: 1527227549}
+  - component: {fileID: 1527227552}
   m_Layer: 5
   m_Name: jump
   m_TagString: Untagged
@@ -7982,9 +8032,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: JoystickPlayerExample, Assembly-CSharp
-        m_MethodName: Jump
+      - m_Target: {fileID: 1527227552}
+        m_TargetAssemblyTypeName: NewBehaviourScript, Assembly-CSharp
+        m_MethodName: jumping
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8032,6 +8082,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1527227547}
   m_CullTransparentMesh: 1
+--- !u!114 &1527227552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1527227547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be9b46eef7080d4f81f9045674d3bc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1535344806
 GameObject:
   m_ObjectHideFlags: 0

@@ -30,6 +30,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     private bool block_mg3 = false;
     private bool block_mg4 = false;
     private bool block_mg5 = false;
+    public int high_score;
     public string current_scene;
 
     private Vector3 minigameOffset = new Vector3(5000f, 0f, 0f);
@@ -146,7 +147,7 @@ public class JoystickPlayerExample : NetworkBehaviour
     public void ReturnToLobby()
     {
         if (!IsOwner) return;
-
+        GameObject.Find("ranking").GetComponent<ranking>().refresh_ranking();
         ShowPlayerForOthersServerRpc();
         
         // Atenção: passe o nome correto da cena privada que o jogador estava

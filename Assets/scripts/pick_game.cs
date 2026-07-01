@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using Unity.VisualScripting;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 public class pick_game : MonoBehaviour
 {
@@ -304,6 +305,52 @@ public class pick_game : MonoBehaviour
             }
             question.text = "faltou: " + (rigth_count-score).ToString() + " pontos";
             exit.SetActive(true);
+        }
+    }
+
+    public void score_button()
+    {
+        StartCoroutine(set_score(GameObject.Find("NetworkManager").GetComponent<test_lobby>().playerName));
+    }
+    public struct EnviarPontosPorNomeData
+    {
+        public string nome_completo;
+        public float pontos_a_adicionar;
+    }
+
+    IEnumerator set_score(string player)
+    {
+        EnviarPontosPorNomeData dados = new EnviarPontosPorNomeData { 
+            nome_completo = player, 
+            pontos_a_adicionar = score 
+        };
+        var url = url_base + "rpc/adicionar_pontuacao_por_nome";
+        string jsonDados = JsonUtility.ToJson(dados);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonDados);
+
+        // 2. Configura a requisição POST
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            // Headers obrigatórios
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("apikey", apiKey);
+            request.SetRequestHeader("Authorization", "Bearer " + apiKey);
+
+            // 3. Envia e aguarda
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"Sucesso! +5 pontos adicionados para o estudante: {player}");
+            }
+            else
+            {
+                Debug.LogError("Erro ao adicionar pontos por nome: " + request.error);
+                Debug.LogError("Detalhes: " + request.downloadHandler.text);
+            }
         }
     }
 }

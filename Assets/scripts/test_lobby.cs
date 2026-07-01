@@ -15,6 +15,7 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using UnityEngine.Networking;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 public class test_lobby : MonoBehaviour
 {
@@ -35,9 +36,9 @@ public class test_lobby : MonoBehaviour
 
     public GameObject login;
 
-    private string playerName;
+    public string playerName;
     private string db_id;
-    public GameObject canvas;
+    public GameObject teacher_canvas;
 
     private async void Start()
     {
@@ -63,8 +64,10 @@ public class test_lobby : MonoBehaviour
         }
     public void IniciarLogin()
     {
+        playerName = db_user.text;
         string email = db_user.text + "@teste.com";
         string senha = db_password.text;
+        StartCoroutine(check_login(playerName));
         StartCoroutine(FazerLoginCoroutine(email, senha));
     }
 
@@ -96,6 +99,7 @@ public class test_lobby : MonoBehaviour
             {
                 Debug.Log("Login efetuado com sucesso!");
                 // A resposta contém o JWT (Access Token), dados do usuário, etc.
+
                 Debug.Log("Resposta do servidor: " + request.downloadHandler.text);
                 lobby_obj.SetActive(true);
                 login.SetActive(false);
@@ -109,8 +113,29 @@ public class test_lobby : MonoBehaviour
                 fail_login.SetActive(true);
             }
         }
+
     }
 
+    IEnumerator check_login(string user)
+    {
+        var url = supabaseUrl + "/rest/v1/profiles?full_name=eq." + user;
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("apikey", supabaseAnonKey);
+        yield return request.SendWebRequest();
+        if (request.result == UnityWebRequest.Result.Success)
+        {    
+            string request_json = request.downloadHandler.text;
+            var request_array = JArray.Parse(request_json);
+            Debug.Log("a resposta foi: " + request_array[0]["role"].ToString());
+            if(request_array[0]["role"].ToString() == "teacher")
+            {
+                teacher_canvas.SetActive(true);
+            }
+        }else
+        {
+            Debug.LogError("Erro: " + request.downloadHandler.text);
+        }
+    }
     private void Awake()
     {
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;

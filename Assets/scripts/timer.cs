@@ -5,6 +5,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 public class timer : MonoBehaviour
 {
@@ -24,6 +27,14 @@ public class timer : MonoBehaviour
 
     public GameObject end_game_mat;
     private bool dead,won = false;
+
+    
+
+    string url_base =
+        "https://oxodeorehirrwdzcvewx.supabase.co/rest/v1/";
+
+    string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94b2Rlb3JlaGlycndkemN2ZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjI1ODEsImV4cCI6MjA5MDEzODU4MX0.qXaHKJD356N71RDh-tygUE79Za-v6zaHOe7NTn2nj30";
+    
 
 
     Coroutine countdownRoutine;
@@ -164,5 +175,51 @@ public class timer : MonoBehaviour
     {
         death_canvas.SetActive(true);
         dead = true;
+    }
+
+    public void score_button()
+    {
+        StartCoroutine(set_score(GameObject.Find("NetworkManager").GetComponent<test_lobby>().playerName));
+    }
+    public struct EnviarPontosPorNomeData
+    {
+        public string nome_completo;
+        public float pontos_a_adicionar;
+    }
+
+    IEnumerator set_score(string player)
+    {
+        EnviarPontosPorNomeData dados = new EnviarPontosPorNomeData { 
+            nome_completo = player, 
+            pontos_a_adicionar = score 
+        };
+        var url = url_base + "rpc/adicionar_pontuacao_por_nome";
+        string jsonDados = JsonUtility.ToJson(dados);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonDados);
+
+        // 2. Configura a requisição POST
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            // Headers obrigatórios
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("apikey", apiKey);
+            request.SetRequestHeader("Authorization", "Bearer " + apiKey);
+
+            // 3. Envia e aguarda
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"Sucesso! +5 pontos adicionados para o estudante: {player}");
+            }
+            else
+            {
+                Debug.LogError("Erro ao adicionar pontos por nome: " + request.error);
+                Debug.LogError("Detalhes: " + request.downloadHandler.text);
+            }
+        }
     }
 }
